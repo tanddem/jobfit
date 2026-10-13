@@ -1,1 +1,34 @@
+# Secrets
 .env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Virtual environments
+myenv/
+.venv/
+venv/
+
+# Frontend (Next.js)
+node_modules/
+frontend/.next/
+frontend/out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local data
+*.sqlite3
+*.sqlite3-journal
+data/
+
+# OS and editors
+.DS_Store
+.idea/
+.vscode/
