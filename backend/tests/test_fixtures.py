@@ -1,9 +1,12 @@
 """Integration tests: every fixture case is complete and agrees with the rubric."""
 
+import os
 import re
 
 import pytest
 
+from app.scoring import ModelOutput, build_result, request_scores
+from app.settings import Settings
 from conftest import FIXTURES, load_json
 
 INDEX = load_json(FIXTURES / "index.json")
@@ -91,3 +94,31 @@ def test_contains_term_respects_word_boundaries():
     assert contains_term("Built CI/CD pipelines", "CI/CD")
     assert not contains_term("PostgreSQL only", "SQL")
     assert not contains_term("It sparked interest", "Spark")
+
+
+def assert_meets_expectations(result, expected):
+    """The scored result lands in every range and finds every required keyword and gap."""
+    assert expected["overall_score"]["min"] <= result.overall <= expected["overall_score"]["max"]
+    assert result.band == expected["band"]
+    for category in result.categories:
+        bounds = expected["categories"][category.id]
+        assert bounds["min"] <= category.score <= bounds["max"], category.id
+    assert set(expected["matched_keywords"]) <= set(result.matched_keywords)
+    assert set(expected["missing_keywords"]) <= set(result.missing_keywords)
+    found = {(g.category, g.severity) for g in result.gaps}
+    for required in expected["required_gaps"]:
+        assert (required["category"], required["severity"]) in found, required["requirement"]
+
+
+def test_replayed_model_output_meets_expectations(case):
+    output = ModelOutput.model_validate(load_json(FIXTURES / case["id"] / "scored.json")).check_rubric()
+    assert_meets_expectations(build_result(output, case["cv"], "fixture"), case["expected"])
+
+
+@pytest.mark.skipif(os.environ.get("OPENROUTER_LIVE") != "1", reason="set OPENROUTER_LIVE=1 to call OpenRouter")
+def test_live_model_meets_expectations(case):
+    settings = Settings.from_env()
+    output = request_scores(
+        case["cv"], case["jd"], api_key=settings.openrouter_api_key, model=settings.openrouter_model
+    )
+    assert_meets_expectations(build_result(output, case["cv"], settings.openrouter_model), case["expected"])

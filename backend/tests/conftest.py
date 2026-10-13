@@ -1,12 +1,14 @@
 """Shared paths, loaders and app fixtures for the test suite."""
 
 import json
+from functools import partial
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.main import create_app
+from app.scoring import score
 from app.settings import Settings
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -61,8 +63,35 @@ def settings(tmp_path):
     return Settings(db_path=tmp_path / "jobfit.sqlite3", static_dir=static_dir)
 
 
+def model_reply(output):
+    """An OpenRouter chat completion body whose message content is output as JSON."""
+    return {"choices": [{"message": {"content": json.dumps(output)}}]}
+
+
+class StubModel:
+    """Stands in for OpenRouter: records each payload and replies with canned bodies in turn."""
+
+    def __init__(self, *replies):
+        self.replies = list(replies)
+        self.payloads = []
+
+    def __call__(self, payload, api_key):
+        self.payloads.append(payload)
+        reply = self.replies.pop(0) if len(self.replies) > 1 else self.replies[0]
+        if isinstance(reply, Exception):
+            raise reply
+        return reply
+
+
 @pytest.fixture
-def client(settings):
-    """A test client for a freshly created app."""
-    with TestClient(create_app(settings)) as test_client:
+def stub_model():
+    """A stub that always returns case-01's hand-made model output."""
+    return StubModel(model_reply(load_json(FIXTURES / "case-01-backend-strong" / "scored.json")))
+
+
+@pytest.fixture
+def client(settings, stub_model):
+    """A test client for a freshly created app, scoring through stub_model."""
+    score_fn = partial(score, api_key="test-key", model="test-model", call=stub_model)
+    with TestClient(create_app(settings, score_fn=score_fn)) as test_client:
         yield test_client

@@ -1,15 +1,44 @@
 {
   "band": "partial",
-  "overall_score": {"min": 50, "max": 65},
-  "categories": {
-    "skills_keywords": {"min": 50, "max": 60},
-    "experience_relevance": {"min": 60, "max": 70},
-    "achievements_impact": {"min": 5, "max": 25},
-    "education_certifications": {"min": 90, "max": 100},
-    "structure_clarity": {"min": 80, "max": 90}
+  "overall_score": {
+    "min": 50,
+    "max": 65
   },
-  "matched_keywords": ["SEO", "Google Analytics", "Meta Ads", "A/B testing"],
-  "missing_keywords": ["Google Ads", "HubSpot", "marketing automation", "SQL", "Looker Studio"],
+  "categories": {
+    "skills_keywords": {
+      "min": 45,
+      "max": 60
+    },
+    "experience_relevance": {
+      "min": 60,
+      "max": 70
+    },
+    "achievements_impact": {
+      "min": 10,
+      "max": 25
+    },
+    "education_certifications": {
+      "min": 90,
+      "max": 100
+    },
+    "structure_clarity": {
+      "min": 90,
+      "max": 100
+    }
+  },
+  "matched_keywords": [
+    "SEO",
+    "Google Analytics",
+    "Meta Ads",
+    "A/B testing"
+  ],
+  "missing_keywords": [
+    "Google Ads",
+    "HubSpot",
+    "marketing automation",
+    "SQL",
+    "Looker Studio"
+  ],
   "required_gaps": [
     {
       "category": "skills_keywords",

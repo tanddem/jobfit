@@ -1,6 +1,6 @@
 .git
 .env
-.claude
+.claude/settings*.json
 myenv
 data
 **/__pycache__

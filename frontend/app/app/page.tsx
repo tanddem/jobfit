@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { uploadCv, type Upload } from "../lib/api";
 import { clearSession, useSession } from "../lib/session";
+import ScorePanel from "../components/ScorePanel";
 
 export default function AppPage() {
   const router = useRouter();
@@ -78,29 +79,12 @@ export default function AppPage() {
             disabled={busy || !cv || !jdText.trim()}
             className="rounded bg-primary px-4 py-2 font-medium text-white disabled:opacity-50"
           >
-            {busy ? "Reading your CV..." : "Upload"}
+            {busy ? "Scoring your CV..." : "Score"}
           </button>
         </div>
       </form>
 
-      {upload && (
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Text we read from {upload.filename}</h2>
-            <button
-              disabled
-              title="Scoring arrives in the next release"
-              className="rounded bg-primary px-4 py-2 font-medium text-white opacity-50"
-            >
-              Score (coming next)
-            </button>
-          </div>
-          <p className="text-sm text-muted">Check that nothing important is missing before scoring.</p>
-          <pre className="max-h-96 overflow-auto whitespace-pre-wrap rounded border border-muted p-4 text-sm">
-            {upload.cv_text}
-          </pre>
-        </section>
-      )}
+      {upload && <ScorePanel upload={upload} />}
     </main>
   );
 }

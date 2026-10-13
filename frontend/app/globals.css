@@ -7,6 +7,7 @@
   --primary: #209dd7;
   --ink: #032147;
   --muted: #888888;
+  --track: #e5e7eb;
 }
 
 @theme inline {
@@ -16,6 +17,7 @@
   --color-primary: var(--primary);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
+  --color-track: var(--track);
 }
 
 body {

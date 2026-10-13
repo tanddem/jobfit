@@ -2,12 +2,51 @@
 
 import type { Session } from "./session";
 
+export type Tone = "strong" | "partial" | "weak";
+
+export type CategoryScore = {
+  id: string;
+  name: string;
+  weight: number;
+  score: number;
+  rationale: string;
+};
+
+export type Gap = {
+  category: string;
+  severity: "high" | "medium" | "low";
+  requirement: string;
+  evidence: string | null;
+  span: [number, number] | null;
+};
+
+export type Highlight = { start: number; end: number; tone: Tone; note: string };
+
+export type ScoreResult = {
+  overall: number;
+  band: string;
+  categories: CategoryScore[];
+  matched_keywords: string[];
+  missing_keywords: string[];
+  gaps: Gap[];
+  highlights: Highlight[];
+  model: string;
+};
+
 export type Upload = {
   upload_id: number;
   filename: string;
   cv_text: string;
   jd_text: string;
+  score: ScoreResult;
 };
+
+/** The colour token for a 0-100 score: strong >= 75, partial 50-74, weak < 50. */
+export function toneFor(score: number): Tone {
+  if (score >= 75) return "strong";
+  if (score >= 50) return "partial";
+  return "weak";
+}
 
 async function errorMessage(response: Response): Promise<string> {
   const body = await response.json().catch(() => null);

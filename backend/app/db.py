@@ -8,11 +8,18 @@ import sqlite3
 
 SCHEMA = """
 DROP TABLE IF EXISTS uploads;
+DROP TABLE IF EXISTS scores;
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE scores (
+    key TEXT PRIMARY KEY,
+    result_json TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -22,6 +29,7 @@ CREATE TABLE uploads (
     filename TEXT NOT NULL,
     cv_text TEXT NOT NULL,
     jd_text TEXT NOT NULL,
+    score_key TEXT NOT NULL REFERENCES scores(key),
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 """

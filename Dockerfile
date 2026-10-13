@@ -16,6 +16,8 @@ WORKDIR /app/backend
 COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/app ./app
+COPY rubric.json /app/rubric.json
+COPY .claude/skills/cv-rubric/SKILL.md /app/.claude/skills/cv-rubric/SKILL.md
 COPY --from=frontend /frontend/out /app/frontend/out
 EXPOSE 8000
 CMD ["uvicorn", "--factory", "app.main:create_app", "--host", "0.0.0.0", "--port", "8000"]

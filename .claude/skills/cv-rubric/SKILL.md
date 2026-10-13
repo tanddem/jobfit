@@ -23,16 +23,27 @@ Every category is scored 0-100. Weights sum to 100.
 
 ### Scoring rules
 
-- `skills_keywords`: required JD skills count twice as much as preferred ones. Score is the weighted share found in the CV. A skill counts only if the CV states it, not if it can be guessed from a job title.
-- `experience_relevance`: start at 100 and subtract for each shortfall. Missing years, a lower seniority level and a different domain each cost points in proportion to how far off they are.
-- `achievements_impact`: score is the share of experience bullets with a concrete, measurable outcome. Vague claims ("improved performance") do not count.
-- `education_certifications`: 100 when every required item is met. A missing required item caps the score at 40; a missing preferred item costs less.
-- `structure_clarity`: deduct for missing sections (summary, experience, skills, education), undated roles, and bullets longer than two lines.
+The model never scores. It reports the facts listed under "Facts the model
+returns", and code applies these rules to them. Every score is clamped to
+0-100 and rounded half up to an integer.
+
+- `skills_keywords`: each JD keyword is `required` or `preferred`. A keyword is matched when the CV contains it as a whole word or phrase, ignoring case. Required keywords count 2, preferred count 1. Score = 100 x matched points / total points. No JD keywords gives 100.
+- `experience_relevance`: start at 100, then subtract
+  - 10 per year short of the years the JD requires, at most 40 (relevant years only)
+  - 10 when the CV's seniority is one level below the JD's, 25 when two or more levels below
+  - 10 when the CV's domain is adjacent to the JD's, 25 when it is different
+  - 10 per other unmet experience requirement (for example team leadership), at most 30
+- `achievements_impact`: score = 100 x experience bullets with a measurable outcome / all experience bullets. An outcome is a number, percentage, amount of money or scale tied to a result. A count of activities ("two events") or a vague claim ("improved performance") is not an outcome. No experience bullets gives 0.
+- `education_certifications`: start at 100 and subtract 15 per unmet preferred item. Any unmet required item caps the score at 40. No education requirements in the JD gives 100.
+- `structure_clarity`: computed from the CV text alone. Start at 100 and subtract
+  - 15 per missing section among summary (or profile), experience, skills, education
+  - 20 when no role carries a year
+  - 5 per experience bullet longer than 250 characters, at most 20
 
 ### Overall score and bands
 
 The overall score is the weighted sum of category scores divided by 100,
-rounded to the nearest integer. It is computed in code, never by the model.
+rounded half up to an integer. It is computed in code, never by the model.
 
 | Band | Range | Colour token |
 |---|---|---|
@@ -40,19 +51,32 @@ rounded to the nearest integer. It is computed in code, never by the model.
 | partial | 50-74 | Partial |
 | weak | 0-49 | Weak |
 
-## Score output schema
+## Facts the model returns
 
-A scoring call returns, per category, a score and the evidence behind it.
-It does not return the overall score or the weights.
+A scoring call extracts and classifies; it never returns a score.
 
-- `categories`: one entry per category id, each with `score` (integer 0-100) and `rationale` (one sentence)
-- `matched_keywords`: JD terms found in the CV
-- `missing_keywords`: JD terms absent from the CV
+- `jd_keywords`: the skills, tools and qualifications the JD asks for, each with
+  - `term`: a short term exactly as the JD spells it (for example `PostgreSQL`, `Google Ads`, `A/B testing`)
+  - `importance`: `required`, or `preferred` when the JD marks it nice to have
+- `experience`:
+  - `years_required`: relevant years the JD asks for, or null
+  - `years_relevant`: years of experience in the CV that are relevant to the JD, or null when the CV gives no dates
+  - `seniority`: `meets`, `one_level_below` or `two_or_more_below`
+  - `domain`: `same`, `adjacent` or `different`
+  - `unmet_requirements`: other experience requirements the CV does not show, each a short phrase
+- `bullets`: every experience bullet, each with
+  - `text`: copied character for character from the CV
+  - `has_outcome`: true when it states a measurable outcome as defined above
+- `education`: each degree or certification the JD asks for, with `requirement`, `importance` and `met`
 - `gaps`: each gap has
   - `category`: a category id
   - `severity`: `high` (a JD requirement is absent), `medium` (present but weak or unproven), or `low` (a polish issue)
   - `requirement`: the JD requirement or rubric criterion that is not met
-  - `evidence`: the CV text the gap refers to, or null when the CV has nothing
+  - `evidence`: the CV text the gap refers to, copied character for character from the CV (one bullet or line at most), or null when the CV has nothing
+
+Code computes every category score with the rules above, the overall score
+from the weights, which keywords are matched or missing, and where each
+gap's `evidence` sits on the CV.
 
 ## Gap severity
 
