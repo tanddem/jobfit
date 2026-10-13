@@ -1,38 +1,51 @@
 """SQLite schema and connections.
 
-The schema is dropped and recreated on every boot. That changes once real
-accounts land and user data has to survive restarts.
+Data survives restarts. The schema version lives in PRAGMA user_version. A
+database from before accounts existed (a users table with no email column)
+held only fake name-only users, so it is reset once on boot.
 """
 
 import sqlite3
 
-SCHEMA = """
-DROP TABLE IF EXISTS uploads;
-DROP TABLE IF EXISTS scores;
-DROP TABLE IF EXISTS users;
+SCHEMA_VERSION = 1
 
-CREATE TABLE users (
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE COLLATE NOCASE,
     name TEXT NOT NULL,
+    password_hash TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE scores (
+CREATE TABLE IF NOT EXISTS sessions (
+    token TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    expires_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS scores (
     key TEXT PRIMARY KEY,
     result_json TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE uploads (
+CREATE TABLE IF NOT EXISTS uploads (
     id INTEGER PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id),
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    company TEXT NOT NULL,
+    role_title TEXT NOT NULL,
     filename TEXT NOT NULL,
     cv_text TEXT NOT NULL,
     jd_text TEXT NOT NULL,
     score_key TEXT NOT NULL REFERENCES scores(key),
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS uploads_by_application ON uploads (user_id, company, role_title);
 """
+
+PRE_ACCOUNT_TABLES = ("uploads", "scores", "users")
 
 
 def connect(db_path):
@@ -49,10 +62,14 @@ def connect(db_path):
 
 
 def init_db(db_path):
-    """Create the database file if needed and reset the schema."""
+    """Create the database if needed and bring its schema up to SCHEMA_VERSION."""
     db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = connect(db_path)
     try:
+        user_columns = {row["name"] for row in conn.execute("PRAGMA table_info(users)")}
+        if user_columns and "email" not in user_columns:
+            conn.executescript("".join(f"DROP TABLE IF EXISTS {t};" for t in PRE_ACCOUNT_TABLES))
         conn.executescript(SCHEMA)
+        conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
     finally:
         conn.close()
