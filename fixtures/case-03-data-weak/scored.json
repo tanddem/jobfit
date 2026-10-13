@@ -1,0 +1,121 @@
+{
+  "jd_keywords": [
+    {
+      "term": "Python",
+      "importance": "required"
+    },
+    {
+      "term": "pandas",
+      "importance": "required"
+    },
+    {
+      "term": "scikit-learn",
+      "importance": "required"
+    },
+    {
+      "term": "machine learning",
+      "importance": "required"
+    },
+    {
+      "term": "PyTorch",
+      "importance": "required"
+    },
+    {
+      "term": "TensorFlow",
+      "importance": "required"
+    },
+    {
+      "term": "statistics",
+      "importance": "required"
+    },
+    {
+      "term": "SQL",
+      "importance": "required"
+    },
+    {
+      "term": "model deployment",
+      "importance": "required"
+    },
+    {
+      "term": "MLflow",
+      "importance": "preferred"
+    },
+    {
+      "term": "Spark",
+      "importance": "preferred"
+    }
+  ],
+  "experience": {
+    "years_required": 3,
+    "years_relevant": 0,
+    "seniority": "meets",
+    "domain": "different",
+    "unmet_requirements": [
+      "building and shipping machine learning models",
+      "model deployment and monitoring in production"
+    ]
+  },
+  "bullets": [
+    {
+      "text": "Built 12 Tableau dashboards used weekly by 40 store managers",
+      "has_outcome": true
+    },
+    {
+      "text": "Wrote SQL queries to automate the monthly sales report, saving 10 hours per month",
+      "has_outcome": true
+    },
+    {
+      "text": "Cleaned and merged supplier data in Python with pandas",
+      "has_outcome": false
+    },
+    {
+      "text": "Presented quarterly sales trends to the regional leadership team",
+      "has_outcome": false
+    },
+    {
+      "text": "Maintained Excel models for delivery cost tracking",
+      "has_outcome": false
+    },
+    {
+      "text": "Created Power BI reports on warehouse throughput",
+      "has_outcome": false
+    },
+    {
+      "text": "Gathered reporting requirements from operations staff",
+      "has_outcome": false
+    }
+  ],
+  "education": [
+    {
+      "requirement": "MSc or PhD in Statistics, Computer Science or another quantitative field",
+      "importance": "required",
+      "met": false
+    }
+  ],
+  "gaps": [
+    {
+      "category": "skills_keywords",
+      "severity": "high",
+      "requirement": "Machine learning with scikit-learn",
+      "evidence": null
+    },
+    {
+      "category": "skills_keywords",
+      "severity": "high",
+      "requirement": "Deep learning with PyTorch or TensorFlow",
+      "evidence": null
+    },
+    {
+      "category": "experience_relevance",
+      "severity": "high",
+      "requirement": "3+ years building and shipping machine learning models",
+      "evidence": null
+    },
+    {
+      "category": "education_certifications",
+      "severity": "high",
+      "requirement": "MSc or PhD in Statistics, Computer Science or another quantitative field",
+      "evidence": "Bachelor of Business Administration, University of Da Nang (2021)"
+    }
+  ]
+}

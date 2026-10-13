@@ -1,0 +1,104 @@
+{
+  "jd_keywords": [
+    {
+      "term": "Python",
+      "importance": "required"
+    },
+    {
+      "term": "FastAPI",
+      "importance": "required"
+    },
+    {
+      "term": "PostgreSQL",
+      "importance": "required"
+    },
+    {
+      "term": "Redis",
+      "importance": "required"
+    },
+    {
+      "term": "Docker",
+      "importance": "required"
+    },
+    {
+      "term": "Kubernetes",
+      "importance": "required"
+    },
+    {
+      "term": "AWS",
+      "importance": "required"
+    },
+    {
+      "term": "CI/CD",
+      "importance": "required"
+    },
+    {
+      "term": "Kafka",
+      "importance": "preferred"
+    },
+    {
+      "term": "Terraform",
+      "importance": "preferred"
+    }
+  ],
+  "experience": {
+    "years_required": 5,
+    "years_relevant": 7,
+    "seniority": "meets",
+    "domain": "same",
+    "unmet_requirements": []
+  },
+  "bullets": [
+    {
+      "text": "Designed a FastAPI payout service processing 1.2M transactions per day with 99.95% uptime",
+      "has_outcome": true
+    },
+    {
+      "text": "Cut p95 latency on the balance API from 420ms to 90ms by tuning PostgreSQL indexes and adding a Redis cache",
+      "has_outcome": true
+    },
+    {
+      "text": "Migrated 14 services from EC2 to Kubernetes on AWS EKS, reducing infrastructure cost by 30%",
+      "has_outcome": true
+    },
+    {
+      "text": "Built CI/CD pipelines in GitHub Actions that run 2,000 automated tests in under 6 minutes",
+      "has_outcome": true
+    },
+    {
+      "text": "Mentored 3 junior engineers, two of whom were promoted within a year",
+      "has_outcome": true
+    },
+    {
+      "text": "Built order and inventory APIs in Python and Django serving 400k monthly users",
+      "has_outcome": true
+    },
+    {
+      "text": "Containerised the monolith with Docker, cutting onboarding setup from two days to one hour",
+      "has_outcome": true
+    },
+    {
+      "text": "Introduced Terraform for RDS and S3 provisioning across three environments",
+      "has_outcome": false
+    },
+    {
+      "text": "Reduced failed checkout rate by 18% by adding idempotency keys to payment calls",
+      "has_outcome": true
+    }
+  ],
+  "education": [
+    {
+      "requirement": "BSc in Computer Science or equivalent experience",
+      "importance": "required",
+      "met": true
+    }
+  ],
+  "gaps": [
+    {
+      "category": "skills_keywords",
+      "severity": "medium",
+      "requirement": "Kafka or another event streaming platform",
+      "evidence": null
+    }
+  ]
+}

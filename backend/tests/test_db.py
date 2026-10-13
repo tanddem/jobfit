@@ -13,7 +13,7 @@ def tables(db_path):
 def test_creates_parent_directory_and_tables(tmp_path):
     db_path = tmp_path / "nested" / "jobfit.sqlite3"
     init_db(db_path)
-    assert tables(db_path) == {"users", "uploads"}
+    assert tables(db_path) == {"users", "uploads", "scores"}
 
 
 def test_reinit_drops_existing_rows(tmp_path):

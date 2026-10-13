@@ -1,4 +1,4 @@
-"""HTTP API: health check, fake login and CV/JD upload."""
+"""HTTP API: health check, fake login, and scored CV/JD uploads."""
 
 import sqlite3
 from typing import Annotated
@@ -9,6 +9,7 @@ from pydantic import BaseModel, StringConstraints
 
 from app.db import connect
 from app.pdf import PdfError, extract_text
+from app.scoring import ScoreResult, ScoringError
 
 MAX_PDF_BYTES = 5 * 1024 * 1024
 MAX_UPLOAD_BODY_BYTES = MAX_PDF_BYTES + 1024 * 1024
@@ -52,6 +53,7 @@ class UploadResponse(BaseModel):
     filename: str
     cv_text: str
     jd_text: str
+    score: ScoreResult
 
 
 @router.get("/health")
@@ -70,12 +72,16 @@ def create_session(body: SessionRequest, db: Db):
 
 @router.post("/uploads", response_model=UploadResponse)
 def create_upload(
+    request: Request,
     db: Db,
     user_id: Annotated[int, Form()],
     jd_text: Annotated[str, Form(max_length=MAX_JD_CHARS)],
     cv: Annotated[UploadFile, File()],
 ):
-    """Store a CV PDF's extracted text alongside a pasted job description."""
+    """Extract a CV PDF's text, score it against the pasted JD, and store both.
+
+    Scoring runs before anything is saved, so a scoring failure leaves no upload.
+    """
     if db.execute("SELECT 1 FROM users WHERE id = ?", (user_id,)).fetchone() is None:
         raise HTTPException(422, "Unknown user.")
     jd_text = jd_text.strip()
@@ -94,10 +100,29 @@ def create_upload(
     if not cv_text:
         raise HTTPException(422, "No text found in the PDF. Scanned CVs are not supported yet.")
 
+    try:
+        score_key, result = request.app.state.score_fn(cv_text, jd_text, conn=db)
+    except ScoringError:
+        raise HTTPException(502, "Scoring is unavailable right now. Please try again.")
+
     filename = cv.filename or "cv.pdf"
     with db:
         upload_id = db.execute(
-            "INSERT INTO uploads (user_id, filename, cv_text, jd_text) VALUES (?, ?, ?, ?)",
-            (user_id, filename, cv_text, jd_text),
+            "INSERT INTO uploads (user_id, filename, cv_text, jd_text, score_key) VALUES (?, ?, ?, ?, ?)",
+            (user_id, filename, cv_text, jd_text, score_key),
         ).lastrowid
-    return UploadResponse(upload_id=upload_id, filename=filename, cv_text=cv_text, jd_text=jd_text)
+    return UploadResponse(
+        upload_id=upload_id, filename=filename, cv_text=cv_text, jd_text=jd_text, score=result
+    )
+
+
+@router.get("/uploads/{upload_id}/score", response_model=ScoreResult)
+def read_score(upload_id: int, db: Db):
+    """The stored score for one upload."""
+    row = db.execute(
+        "SELECT s.result_json FROM uploads u JOIN scores s ON s.key = u.score_key WHERE u.id = ?",
+        (upload_id,),
+    ).fetchone()
+    if row is None:
+        raise HTTPException(404, "Upload not found.")
+    return ScoreResult.model_validate_json(row["result_json"])

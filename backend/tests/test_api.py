@@ -1,8 +1,10 @@
 """Integration tests for the HTTP API and frontend serving."""
 
 from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 from io import BytesIO
 
+import httpx2
 import pytest
 from fastapi.testclient import TestClient
 from pypdf import PdfReader, PdfWriter
@@ -10,8 +12,9 @@ from pypdf import PdfReader, PdfWriter
 from app.api import MAX_JD_CHARS, MAX_PDF_BYTES, MAX_UPLOAD_BODY_BYTES
 from app.db import connect
 from app.main import create_app
+from app.scoring import score
 from app.settings import Settings
-from conftest import make_pdf
+from conftest import StubModel, make_pdf
 
 JD = "Senior Backend Engineer. 5+ years of Python."
 
@@ -150,3 +153,29 @@ def test_upload_rejects_declared_oversized_body_before_reading(client):
 
 def test_upload_rejects_overlong_jd(client, user_id):
     assert upload(client, user_id, make_pdf("Linh"), jd="x" * (MAX_JD_CHARS + 1)).status_code == 422
+
+
+def test_upload_returns_and_stores_the_score(client, user_id):
+    body = upload(client, user_id, make_pdf("Linh Tran", "Python, FastAPI, Kafka")).json()
+    score = body["score"]
+    # Case-01 facts on a two-line CV: skills 28, experience 100, achievements 89,
+    # education 100, structure 20 (no headings, no year) -> 64.6 -> 65.
+    assert score["overall"] == 65
+    assert score["band"] == "partial"
+    assert "Python" in score["matched_keywords"]
+    assert client.get(f"/api/uploads/{body['upload_id']}/score").json() == score
+
+
+def test_scoring_failure_returns_502_and_stores_nothing(settings):
+    failing = partial(score, api_key="k", model="m", call=StubModel(httpx2.ConnectError("down")))
+    with TestClient(create_app(settings, score_fn=failing)) as failing_client:
+        uid = failing_client.post("/api/session", json={"name": "Linh"}).json()["user_id"]
+        response = upload(failing_client, uid, make_pdf("Linh Tran"))
+    assert response.status_code == 502
+    conn = connect(settings.db_path)
+    assert conn.execute("SELECT COUNT(*) FROM uploads").fetchone()[0] == 0
+    conn.close()
+
+
+def test_score_for_unknown_upload_is_404(client):
+    assert client.get("/api/uploads/999/score").status_code == 404

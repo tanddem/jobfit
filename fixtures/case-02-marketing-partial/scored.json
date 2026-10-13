@@ -1,0 +1,120 @@
+{
+  "jd_keywords": [
+    {
+      "term": "SEO",
+      "importance": "required"
+    },
+    {
+      "term": "Google Analytics",
+      "importance": "required"
+    },
+    {
+      "term": "Google Ads",
+      "importance": "required"
+    },
+    {
+      "term": "Meta Ads",
+      "importance": "required"
+    },
+    {
+      "term": "HubSpot",
+      "importance": "required"
+    },
+    {
+      "term": "marketing automation",
+      "importance": "required"
+    },
+    {
+      "term": "A/B testing",
+      "importance": "required"
+    },
+    {
+      "term": "SQL",
+      "importance": "preferred"
+    },
+    {
+      "term": "Looker Studio",
+      "importance": "preferred"
+    }
+  ],
+  "experience": {
+    "years_required": 5,
+    "years_relevant": 4,
+    "seniority": "one_level_below",
+    "domain": "same",
+    "unmet_requirements": [
+      "2 years leading a team"
+    ]
+  },
+  "bullets": [
+    {
+      "text": "Ran Meta Ads campaigns for new product launches",
+      "has_outcome": false
+    },
+    {
+      "text": "Grew organic traffic by 65% in 12 months through an SEO content programme",
+      "has_outcome": true
+    },
+    {
+      "text": "Ran A/B testing on email subject lines and landing pages",
+      "has_outcome": false
+    },
+    {
+      "text": "Built weekly performance reports in Google Analytics",
+      "has_outcome": false
+    },
+    {
+      "text": "Worked with designers and the sales team on seasonal promotions",
+      "has_outcome": false
+    },
+    {
+      "text": "Managed Facebook and Instagram pages for a fashion retailer",
+      "has_outcome": false
+    },
+    {
+      "text": "Wrote blog posts and product descriptions for the online store",
+      "has_outcome": false
+    },
+    {
+      "text": "Sent monthly newsletters with Mailchimp",
+      "has_outcome": false
+    },
+    {
+      "text": "Helped organise two in-store events",
+      "has_outcome": false
+    }
+  ],
+  "education": [
+    {
+      "requirement": "Bachelor's degree in Marketing, Business or a related field",
+      "importance": "required",
+      "met": true
+    }
+  ],
+  "gaps": [
+    {
+      "category": "skills_keywords",
+      "severity": "high",
+      "requirement": "Google Ads campaign management with budget ownership",
+      "evidence": null
+    },
+    {
+      "category": "skills_keywords",
+      "severity": "high",
+      "requirement": "HubSpot or a similar platform for marketing automation",
+      "evidence": null
+    },
+    {
+      "category": "experience_relevance",
+      "severity": "high",
+      "requirement": "At least 2 years leading a team",
+      "evidence": null
+    },
+    {
+      "category": "achievements_impact",
+      "severity": "medium",
+      "requirement": "Meta Ads campaigns described without spend, ROAS or conversion results",
+      "evidence": "Ran Meta Ads campaigns for new product launches"
+    }
+  ]
+}
