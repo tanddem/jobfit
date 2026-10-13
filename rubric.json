@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "bands": {
+    "strong": {"min": 75, "max": 100},
+    "partial": {"min": 50, "max": 74},
+    "weak": {"min": 0, "max": 49}
+  },
+  "categories": [
+    {
+      "id": "skills_keywords",
+      "name": "Skills and keywords",
+      "weight": 35,
+      "measures": "Required and preferred skills, tools and terms from the JD that appear in the CV.",
+      "scoring": "Weighted share of JD skills found in the CV; required skills count twice as much as preferred. A skill counts only if the CV states it."
+    },
+    {
+      "id": "experience_relevance",
+      "name": "Experience relevance",
+      "weight": 25,
+      "measures": "Years of experience, seniority and domain compared with what the JD asks for.",
+      "scoring": "Start at 100; subtract in proportion to missing years, a lower seniority level and a different domain."
+    },
+    {
+      "id": "achievements_impact",
+      "name": "Achievements and impact",
+      "weight": 20,
+      "measures": "Share of experience bullets that state a measurable outcome.",
+      "scoring": "Share of experience bullets with a concrete number, percentage, amount or scale. Vague claims do not count."
+    },
+    {
+      "id": "education_certifications",
+      "name": "Education and certifications",
+      "weight": 10,
+      "measures": "Degree, field of study and certifications the JD requires or prefers.",
+      "scoring": "100 when every required item is met; a missing required item caps the score at 40; a missing preferred item costs less."
+    },
+    {
+      "id": "structure_clarity",
+      "name": "Structure and clarity",
+      "weight": 10,
+      "measures": "Standard sections present, dated roles, concise bullets a reader can scan.",
+      "scoring": "Deduct for missing sections (summary, experience, skills, education), undated roles, and bullets longer than two lines."
+    }
+  ]
+}

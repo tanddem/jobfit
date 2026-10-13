@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "id": "case-01-backend-strong",
+      "band": "strong",
+      "description": "Senior backend engineer applying for a senior backend role; strong match."
+    },
+    {
+      "id": "case-02-marketing-partial",
+      "band": "partial",
+      "description": "Digital marketing specialist applying for a marketing manager role; partial match."
+    },
+    {
+      "id": "case-03-data-weak",
+      "band": "weak",
+      "description": "Data analyst applying for a data scientist role; weak match."
+    }
+  ]
+}

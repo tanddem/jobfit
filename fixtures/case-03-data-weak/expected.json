@@ -1,0 +1,35 @@
+{
+  "band": "weak",
+  "overall_score": {"min": 22, "max": 49},
+  "categories": {
+    "skills_keywords": {"min": 15, "max": 30},
+    "experience_relevance": {"min": 20, "max": 40},
+    "achievements_impact": {"min": 20, "max": 35},
+    "education_certifications": {"min": 20, "max": 40},
+    "structure_clarity": {"min": 70, "max": 90}
+  },
+  "matched_keywords": ["Python", "pandas", "SQL"],
+  "missing_keywords": ["machine learning", "scikit-learn", "PyTorch", "TensorFlow", "statistics", "model deployment", "MLflow", "Spark"],
+  "required_gaps": [
+    {
+      "category": "skills_keywords",
+      "severity": "high",
+      "requirement": "Machine learning with scikit-learn"
+    },
+    {
+      "category": "skills_keywords",
+      "severity": "high",
+      "requirement": "Deep learning with PyTorch or TensorFlow"
+    },
+    {
+      "category": "experience_relevance",
+      "severity": "high",
+      "requirement": "3+ years building and shipping machine learning models"
+    },
+    {
+      "category": "education_certifications",
+      "severity": "high",
+      "requirement": "MSc or PhD in Statistics, Computer Science or another quantitative field"
+    }
+  ]
+}

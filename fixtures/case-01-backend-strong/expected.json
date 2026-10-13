@@ -1,0 +1,20 @@
+{
+  "band": "strong",
+  "overall_score": {"min": 80, "max": 98},
+  "categories": {
+    "skills_keywords": {"min": 85, "max": 95},
+    "experience_relevance": {"min": 85, "max": 100},
+    "achievements_impact": {"min": 85, "max": 100},
+    "education_certifications": {"min": 90, "max": 100},
+    "structure_clarity": {"min": 80, "max": 95}
+  },
+  "matched_keywords": ["Python", "FastAPI", "PostgreSQL", "Redis", "Docker", "Kubernetes", "AWS", "CI/CD", "Terraform"],
+  "missing_keywords": ["Kafka"],
+  "required_gaps": [
+    {
+      "category": "skills_keywords",
+      "severity": "medium",
+      "requirement": "Kafka or another event streaming platform"
+    }
+  ]
+}
