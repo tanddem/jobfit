@@ -11,12 +11,14 @@ ROOT = Path(__file__).resolve().parents[2]
 
 @dataclass(frozen=True)
 class Settings:
-    """Where data lives, where the frontend is served from, and how to reach OpenRouter."""
+    """Where data lives, where the frontend is served from, how to reach OpenRouter,
+    and whether the session cookie is HTTPS-only."""
 
     db_path: Path
     static_dir: Path
     openrouter_api_key: str = ""
     openrouter_model: str = ""
+    cookie_secure: bool = False
 
     @classmethod
     def from_env(cls):
@@ -30,4 +32,5 @@ class Settings:
             static_dir=Path(os.environ.get("JOBFIT_STATIC_DIR", ROOT / "frontend" / "out")),
             openrouter_api_key=os.environ.get("OPENROUTER_API_KEY", ""),
             openrouter_model=os.environ.get("OPENROUTER_MODEL", ""),
+            cookie_secure=os.environ.get("JOBFIT_COOKIE_SECURE") == "1",
         )

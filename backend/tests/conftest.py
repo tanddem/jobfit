@@ -90,8 +90,33 @@ def stub_model():
 
 
 @pytest.fixture
-def client(settings, stub_model):
-    """A test client for a freshly created app, scoring through stub_model."""
-    score_fn = partial(score, api_key="test-key", model="test-model", call=stub_model)
-    with TestClient(create_app(settings, score_fn=score_fn)) as test_client:
+def app(settings, stub_model):
+    """A freshly created app scoring through stub_model."""
+    return create_app(settings, score_fn=partial(score, api_key="test-key", model="test-model", call=stub_model))
+
+
+@pytest.fixture
+def client(app):
+    """A signed-out browser."""
+    with TestClient(app) as test_client:
+        yield test_client
+
+
+def register(client, email="linh@example.com", name="Linh Tran", password="correct horse"):
+    """Create an account through the API; the client keeps the session cookie."""
+    return client.post("/api/auth/register", json={"email": email, "name": name, "password": password})
+
+
+@pytest.fixture
+def signed_in(client):
+    """A browser signed in as linh@example.com."""
+    assert register(client).status_code == 201
+    return client
+
+
+@pytest.fixture
+def other_user(app):
+    """A second browser, signed in as a different account."""
+    with TestClient(app) as test_client:
+        assert register(test_client, email="minh@example.com", name="Minh").status_code == 201
         yield test_client

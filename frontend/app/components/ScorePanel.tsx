@@ -1,4 +1,4 @@
-import type { Upload } from "../lib/api";
+import type { UploadDetail } from "../lib/api";
 import CategoryBar from "./CategoryBar";
 import CvView from "./CvView";
 import ScoreRing from "./ScoreRing";
@@ -16,7 +16,7 @@ function Pills({ terms, className }: { terms: string[]; className: string }) {
 }
 
 /** The scoring result: overall ring, category bars, keyword sets, and the marked-up CV. */
-export default function ScorePanel({ upload }: { upload: Upload }) {
+export default function ScorePanel({ upload }: { upload: UploadDetail }) {
   const { score } = upload;
   return (
     <section className="grid gap-8 md:grid-cols-[18rem_1fr]">

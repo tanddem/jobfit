@@ -1,6 +1,4 @@
-/** Calls to the FastAPI backend. */
-
-import type { Session } from "./session";
+/** Calls to the FastAPI backend. The session lives in an HTTP-only cookie the browser sends. */
 
 export type Tone = "strong" | "partial" | "weak";
 
@@ -33,9 +31,19 @@ export type ScoreResult = {
   model: string;
 };
 
-export type Upload = {
+export type Account = { id: number; email: string; name: string };
+
+export type UploadSummary = {
   upload_id: number;
+  company: string;
+  role_title: string;
   filename: string;
+  created_at: string;
+  overall: number;
+  band: string;
+};
+
+export type UploadDetail = Omit<UploadSummary, "overall" | "band"> & {
   cv_text: string;
   jd_text: string;
   score: ScoreResult;
@@ -48,29 +56,49 @@ export function toneFor(score: number): Tone {
   return "weak";
 }
 
-async function errorMessage(response: Response): Promise<string> {
-  const body = await response.json().catch(() => null);
-  if (typeof body?.detail === "string") return body.detail;
-  return `Request failed (${response.status}).`;
+/** Thrown when the session is missing or expired. */
+export class SignedOutError extends Error {}
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(path, init);
+  if (response.status === 401 && !path.startsWith("/api/auth/login")) throw new SignedOutError();
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    const detail = body?.detail;
+    if (typeof detail === "string") throw new Error(detail);
+    if (Array.isArray(detail) && typeof detail[0]?.msg === "string") throw new Error(detail[0].msg);
+    throw new Error(`Request failed (${response.status}).`);
+  }
+  return response.status === 204 ? (undefined as T) : response.json();
 }
 
-export async function createSession(name: string): Promise<Session> {
-  const response = await fetch("/api/session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name }),
-  });
-  if (!response.ok) throw new Error(await errorMessage(response));
-  const body = await response.json();
-  return { userId: body.user_id, name: body.name };
+function json(body: unknown): RequestInit {
+  return { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
 }
 
-export async function uploadCv(userId: number, cv: File, jdText: string): Promise<Upload> {
+export const register = (email: string, name: string, password: string) =>
+  request<Account>("/api/auth/register", json({ email, name, password }));
+
+export const login = (email: string, password: string) => request<Account>("/api/auth/login", json({ email, password }));
+
+export const logout = () => request<void>("/api/auth/logout", { method: "POST" });
+
+export const me = () => request<Account>("/api/auth/me");
+
+export function uploadCv(company: string, roleTitle: string, cv: File, jdText: string) {
   const form = new FormData();
-  form.append("user_id", String(userId));
+  form.append("company", company);
+  form.append("role_title", roleTitle);
   form.append("jd_text", jdText);
   form.append("cv", cv);
-  const response = await fetch("/api/uploads", { method: "POST", body: form });
-  if (!response.ok) throw new Error(await errorMessage(response));
-  return response.json();
+  return request<UploadDetail>("/api/uploads", { method: "POST", body: form });
 }
+
+export function listUploads(filter?: { company: string; role: string }) {
+  const query = filter ? `?${new URLSearchParams(filter)}` : "";
+  return request<UploadSummary[]>(`/api/uploads${query}`);
+}
+
+export const getUpload = (id: number) => request<UploadDetail>(`/api/uploads/${id}`);
+
+export const deleteUpload = (id: number) => request<void>(`/api/uploads/${id}`, { method: "DELETE" });
