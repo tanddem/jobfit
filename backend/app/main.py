@@ -6,16 +6,18 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.db import init_db
-from app.routers import auth, uploads
+from app.jd_fetch import fetch_jd
+from app.routers import auth, jd, uploads
 from app.scoring import score
 from app.settings import Settings
 
 
-def create_app(settings=None, score_fn=None):
+def create_app(settings=None, score_fn=None, jd_fetch_fn=None):
     """Bring the database schema up to date, mount the API, and serve the frontend build if present.
 
     score_fn(cv_text, jd_text, conn=...) -> (cache key, ScoreResult) defaults to
-    the OpenRouter scorer; tests inject their own.
+    the OpenRouter scorer, and jd_fetch_fn(url) -> FetchedJd to the real fetcher;
+    tests inject their own.
     """
     settings = settings or Settings.from_env()
     init_db(settings.db_path)
@@ -25,6 +27,7 @@ def create_app(settings=None, score_fn=None):
     app.state.score_fn = score_fn or partial(
         score, api_key=settings.openrouter_api_key, model=settings.openrouter_model
     )
+    app.state.jd_fetch_fn = jd_fetch_fn or fetch_jd
     app.middleware("http")(uploads.limit_upload_size)
 
     @app.get("/api/health")
@@ -34,6 +37,7 @@ def create_app(settings=None, score_fn=None):
 
     app.include_router(auth.router)
     app.include_router(uploads.router)
+    app.include_router(jd.router)
     if settings.static_dir.is_dir():
         app.mount("/", StaticFiles(directory=settings.static_dir, html=True), name="frontend")
     return app

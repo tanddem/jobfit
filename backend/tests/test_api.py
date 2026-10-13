@@ -190,3 +190,13 @@ def test_concurrent_requests_share_the_threadpool(signed_in):
     with ThreadPoolExecutor(16) as pool:
         codes = list(pool.map(lambda _: signed_in.get("/api/auth/me").status_code, range(200)))
     assert set(codes) == {200}
+
+
+def test_upload_keeps_the_jd_link(signed_in):
+    response = signed_in.post(
+        "/api/uploads",
+        data={"company": "Northwind", "role_title": "Backend Engineer", "jd_text": JD, "jd_url": " https://jobs.example.com/1 "},
+        files={"cv": ("cv.pdf", make_pdf("Linh Tran", "Python"), "application/pdf")},
+    )
+    assert response.json()["jd_url"] == "https://jobs.example.com/1"
+    assert upload(signed_in).json()["jd_url"] is None

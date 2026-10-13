@@ -43,11 +43,14 @@ export type UploadSummary = {
   band: string;
 };
 
-export type UploadDetail = Omit<UploadSummary, "overall" | "band"> & {
+export type UploadDetail = UploadSummary & {
   cv_text: string;
   jd_text: string;
+  jd_url: string | null;
   score: ScoreResult;
 };
+
+export type FetchedJd = { jd_text: string; final_url: string };
 
 /** The colour token for a 0-100 score: strong >= 75, partial 50-74, weak < 50. */
 export function toneFor(score: number): Tone {
@@ -85,11 +88,14 @@ export const logout = () => request<void>("/api/auth/logout", { method: "POST" }
 
 export const me = () => request<Account>("/api/auth/me");
 
-export function uploadCv(company: string, roleTitle: string, cv: File, jdText: string) {
+export const fetchJd = (url: string) => request<FetchedJd>("/api/jd/fetch", json({ url }));
+
+export function uploadCv(company: string, roleTitle: string, cv: File, jdText: string, jdUrl: string | null) {
   const form = new FormData();
   form.append("company", company);
   form.append("role_title", roleTitle);
   form.append("jd_text", jdText);
+  if (jdUrl) form.append("jd_url", jdUrl);
   form.append("cv", cv);
   return request<UploadDetail>("/api/uploads", { method: "POST", body: form });
 }
