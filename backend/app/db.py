@@ -2,12 +2,14 @@
 
 Data survives restarts. The schema version lives in PRAGMA user_version. A
 database from before accounts existed (a users table with no email column)
-held only fake name-only users, so it is reset once on boot.
+held only fake name-only users, so it is reset once on boot. Later changes
+are additive and keyed on what is actually in the database, so a crash part
+way through is safe to re-run.
 """
 
 import sqlite3
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
@@ -39,6 +41,7 @@ CREATE TABLE IF NOT EXISTS uploads (
     cv_text TEXT NOT NULL,
     jd_text TEXT NOT NULL,
     score_key TEXT NOT NULL REFERENCES scores(key),
+    jd_url TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -70,6 +73,9 @@ def init_db(db_path):
         if user_columns and "email" not in user_columns:
             conn.executescript("".join(f"DROP TABLE IF EXISTS {t};" for t in PRE_ACCOUNT_TABLES))
         conn.executescript(SCHEMA)
+        upload_columns = {row["name"] for row in conn.execute("PRAGMA table_info(uploads)")}
+        if "jd_url" not in upload_columns:
+            conn.execute("ALTER TABLE uploads ADD COLUMN jd_url TEXT")
         conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
     finally:
         conn.close()

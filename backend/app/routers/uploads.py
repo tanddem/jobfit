@@ -40,10 +40,11 @@ class UploadSummary(BaseModel):
 class UploadDetail(UploadSummary):
     cv_text: str
     jd_text: str
+    jd_url: str | None
     score: ScoreResult
 
 
-UPLOAD_COLUMNS = "u.id, u.company, u.role_title, u.filename, u.created_at, u.cv_text, u.jd_text, s.result_json"
+UPLOAD_COLUMNS = "u.id, u.company, u.role_title, u.filename, u.created_at, u.cv_text, u.jd_text, u.jd_url, s.result_json"
 
 
 def to_detail(row):
@@ -59,6 +60,7 @@ def to_detail(row):
         band=score.band,
         cv_text=row["cv_text"],
         jd_text=row["jd_text"],
+        jd_url=row["jd_url"],
         score=score,
     )
 
@@ -90,8 +92,11 @@ def create_upload(
     role_title: Annotated[str, Form(max_length=MAX_LABEL_CHARS)],
     jd_text: Annotated[str, Form(max_length=MAX_JD_CHARS)],
     cv: Annotated[UploadFile, File()],
+    jd_url: Annotated[str | None, Form(max_length=2000)] = None,
 ):
-    """Extract a CV PDF's text, score it against the pasted JD, and store it under company and role.
+    """Extract a CV PDF's text, score it against the JD, and store it under company and role.
+
+    jd_url records the link the JD was fetched from, when it was.
 
     Scoring runs before anything is saved, so a scoring failure leaves no upload.
     """
@@ -118,9 +123,9 @@ def create_upload(
 
     with db:
         upload_id = db.execute(
-            "INSERT INTO uploads (user_id, company, role_title, filename, cv_text, jd_text, score_key) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (user["id"], company, role_title, cv.filename or "cv.pdf", cv_text, jd_text, score_key),
+            "INSERT INTO uploads (user_id, company, role_title, filename, cv_text, jd_text, jd_url, score_key) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (user["id"], company, role_title, cv.filename or "cv.pdf", cv_text, jd_text, (jd_url or "").strip() or None, score_key),
         ).lastrowid
     return to_detail(owned_upload(db, user, upload_id))
 

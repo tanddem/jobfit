@@ -80,3 +80,28 @@ def test_pre_account_database_is_reset_once(tmp_path):
     assert conn.execute("SELECT COUNT(*) FROM users").fetchone()[0] == 0
     conn.close()
     assert user_version(db_path) == SCHEMA_VERSION
+
+
+def test_version_1_database_gains_jd_url_and_keeps_rows(tmp_path):
+    db_path = tmp_path / "jobfit.sqlite3"
+    init_db(db_path)
+    conn = connect(db_path)
+    with conn:
+        conn.execute("ALTER TABLE uploads DROP COLUMN jd_url")
+        conn.execute("INSERT INTO users (email, name, password_hash) VALUES ('a@b.co', 'A', 'h')")
+        conn.execute("INSERT INTO scores (key, result_json) VALUES ('k', '{}')")
+        conn.execute(
+            "INSERT INTO uploads (user_id, company, role_title, filename, cv_text, jd_text, score_key) "
+            "VALUES (1, 'Co', 'Role', 'cv.pdf', 'cv', 'jd', 'k')"
+        )
+    conn.execute("PRAGMA user_version = 1")
+    conn.close()
+
+    init_db(db_path)
+    init_db(db_path)
+
+    conn = connect(db_path)
+    row = conn.execute("SELECT company, jd_url FROM uploads").fetchone()
+    conn.close()
+    assert (row["company"], row["jd_url"]) == ("Co", None)
+    assert user_version(db_path) == SCHEMA_VERSION == 2
